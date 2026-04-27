@@ -1,0 +1,593 @@
+﻿<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{background:#000;color:#fff;font-family:Arial;margin:0;padding:10px;font-size:16px}
+select{font-size:18px;padding:6px;margin-bottom:10px;background:#111;color:#fff;border:1px solid #444}
+button{font-size:16px;padding:6px 10px;margin-left:10px;background:#333;color:#fff;border:1px solid #555;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td{padding:6px 4px;border-bottom:1px solid #333}
+.qty{text-align:right;width:30px;padding-right:4px}
+.precio{text-align:right;width:50px;padding-left:2px;padding-right:0px}
+.chk{text-align:right;width:35px;padding-right:2px}
+input[type=checkbox]{transform:scale(1.5);margin:0}
+.faded{opacity:0.35}
+.titulo{background:#111;color:#7FAF7F;font-weight:bold}
+.titulo td{padding:8px 4px}
+.subtitulo-total{color:#FFC107;font-size:12px;float:right;font-weight:normal}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.topbar h3{margin:0}
+.topbar button{background:#550000;border:1px solid #aa4444}
+.topbar div{flex:1;text-align:right}
+.edit-active{background:#221100 !important;border:1px solid #FFC107 !important;color:#FFC107 !important}
+[contenteditable='true']{outline:none;border-bottom:1px dashed #888}
+[contenteditable='false']{outline:none;border-bottom:none;cursor:default}
+.editando{background:#1a1a00 !important;color:#FFC107 !important;outline:1px solid #FFC107 !important;}
+</style>
+</head><body>
+<div class='topbar'>
+<h3 style='color:#4CAF50'>Lista Super 27/04</h3>
+<div>
+<button onclick='exportarJSON()'>Gen Feedback</button>
+<button onclick='borrarChecks()'>Borrar checks</button>
+</div>
+</div>
+<select id='titulos' onchange='mostrar()'></select>
+<select id='proveedor' onchange='mostrar()'>
+<option value='0'>Coto</option>
+<option value='1'>Diego</option>
+<option value='2'>Carrefour</option>
+<option value='3'>Gustavo</option>
+</select>
+<button id='btnComprados' onclick='toggleChecked()' style='color:#4CAF50'>Comprados No</button>
+<button id='btnEdit' onclick='toggleEdit()' title='Habilitar edicion de nombres'>&#128274; Nombres</button>
+<div style='margin-top:10px;padding:8px;border:1px solid #444;background:#111;text-align:center'>
+<span id='totalPendiente' style='font-size:18px;color:#FFC107;display:inline-block;width:100%'>Total: $0,00</span>
+</div>
+<table id='tabla'></table>
+<script>
+var lista={
+"Bazar":[
+{d:"Platos Playos",d_orig:"Platos Playos",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Platos hondos",d_orig:"Platos hondos",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Vaso Boston",d_orig:"Vaso Boston",c:0,p:[3499.00,0.00,0.00,0.00]},
+{d:"Tazas",d_orig:"Tazas",c:0,p:[9099.30,0.00,0.00,0.00]},
+{d:"Tenedor Tramontina madera x3",d_orig:"Tenedor Tramontina madera x3",c:0,p:[9099.30,0.00,0.00,0.00]},
+{d:"Cuchillo Tramontina madera x3",d_orig:"Cuchillo Tramontina madera x3",c:0,p:[7699.00,0.00,0.00,0.00]},
+{d:"Cuchara Tramontina madera x3",d_orig:"Cuchara Tramontina madera x3",c:0,p:[9099.30,0.00,0.00,0.00]},
+{d:"Cuchara café Tramontin mad x3",d_orig:"Cuchara café Tramontin mad x3",c:0,p:[8999.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Perfumería":[
+{d:"Shampoo Dove x400ml",d_orig:"Shampoo Dove x400ml",c:0,p:[8635.00,0.00,0.00,0.00]},
+{d:"Crema enjuague",d_orig:"Crema enjuague",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Desodor Axe Marine 150ml",d_orig:"Desodor Axe Marine 150ml",c:0,p:[4159.00,0.00,0.00,0.00]},
+{d:"Desodor Axe Marine 330ml",d_orig:"Desodor Axe Marine 330ml",c:0,p:[4990.00,0.00,0.00,0.00]},
+{d:"Jabón toc Palmolive x125g",d_orig:"Jabón toc Palmolive x125g",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Espuma afeitar Palmolive",d_orig:"Espuma afeitar Palmolive",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Repuestos Sensor Excel x 5",d_orig:"Repuestos Sensor Excel x 5",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Hisopos Johnson x 150",d_orig:"Hisopos Johnson x 150",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Dentífrico Colgate 140 gr",d_orig:"Dentífrico Colgate 140 gr",c:0,p:[6300.00,0.00,0.00,0.00]},
+{d:"Cepillo dientes GUM",d_orig:"Cepillo dientes GUM",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Algodón x 150g",d_orig:"Algodón x 150g",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Alcohol x 1 Lt",d_orig:"Alcohol x 1 Lt",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Espadol 250 ml",d_orig:"Espadol 250 ml",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Congelados":[
+{d:"Paty común x 4",d_orig:"Paty común x 4",c:1,p:[9062.00,0.00,0.00,0.00]},
+{d:"Medallones de pollo J y Q",d_orig:"Medallones de pollo J y Q",c:1,p:[7999.00,0.00,0.00,0.00]},
+{d:"Espinaca Granja del Sol x1kg",d_orig:"Espinaca Granja del Sol x1kg",c:0,p:[8870.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Láct / Helad":[
+{d:"Tap empan Salteña crioll x12",d_orig:"Tap empan Salteña crioll x12",c:1,p:[2150.00,0.00,0.00,0.00]},
+{d:"Tapa pascual Salteña criolla",d_orig:"Tapa pascual Salteña criolla",c:0,p:[2450.00,0.00,0.00,0.00]},
+{d:"Ravioles ricota espinaca 4que",d_orig:"Ravioles ricota espinaca 4que",c:0,p:[3800.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Queso crem Punta Agua x kg",d_orig:"Queso crem Punta Agua x kg",c:0.5,p:[9599.00,0.00,0.00,0.00]},
+{d:"Queso Azul Santa Rosa x kg",d_orig:"Queso Azul Santa Rosa x kg",c:0.25,p:[31899.00,0.00,0.00,0.00]},
+{d:"Queso Regianito x kg",d_orig:"Queso Regianito x kg",c:0.25,p:[24299.00,0.00,0.00,0.00]},
+{d:"Queso Parmesano x kg",d_orig:"Queso Parmesano x kg",c:0.25,p:[41999.00,0.00,0.00,0.00]},
+{d:"Queso Pategrás x kg",d_orig:"Queso Pategrás x kg",c:0.25,p:[20999.00,0.00,0.00,0.00]},
+{d:"Mozzarella Canut x kg",d_orig:"Mozzarella Canut x kg",c:0.5,p:[17499.00,0.00,0.00,0.00]},
+{d:"Casancrem x 500gr",d_orig:"Casancrem x 500gr",c:1,p:[7000.00,74241.00,0.00,0.00]},
+{d:"Queso Finlandia clásic x290gr",d_orig:"Queso Finlandia clásic x290gr",c:1,p:[5500.00,74241.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Salchichas Vienissima x12",d_orig:"Salchichas Vienissima x12",c:1,p:[5899.00,0.00,0.00,0.00]},
+{d:"Levadura fresca 2 x 50gr",d_orig:"Levadura fresca 2 x 50gr",c:0,p:[999.00,0.00,0.00,0.00]},
+{d:"Jamón Cocido Paladini",d_orig:"Jamón Cocido Paladini",c:0.1,p:[0.00,0.00,0.00,0.00]},
+{d:"Arrollado de pollo",d_orig:"Arrollado de pollo",c:0.1,p:[0.00,0.00,0.00,0.00]},
+{d:"Lomito Paladini",d_orig:"Lomito Paladini",c:0.1,p:[0.00,0.00,0.00,0.00]},
+{d:"Bondiola Paladini",d_orig:"Bondiola Paladini",c:0.1,p:[0.00,0.00,0.00,0.00]},
+{d:"Mortadela mini Paladi x300gr",d_orig:"Mortadela mini Paladi x300gr",c:1,p:[4649.00,0.00,0.00,0.00]},
+{d:"Queso maquina Barra sancor",d_orig:"Queso maquina Barra sancor",c:0.1,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Manteca Sancor x 200g",d_orig:"Manteca Sancor x 200g",c:2,p:[4720.00,0.00,0.00,0.00]},
+{d:"Dulce de batata Esnaola kg",d_orig:"Dulce de batata Esnaola kg",c:0.5,p:[3899.00,0.00,0.00,0.00]},
+{d:"Dulce Membrillo Esnaola Kg",d_orig:"Dulce Membrillo Esnaola Kg",c:0.5,p:[6399.00,0.00,0.00,0.00]},
+{d:"Yogurt natural 300gr",d_orig:"Yogurt natural 300gr",c:1,p:[3500.00,0.00,0.00,0.00]},
+{d:"Leche La Serenísima entera",d_orig:"Leche La Serenísima entera",c:3,p:[1899.00,0.00,0.00,0.00]},
+{d:"Crema leche Serenísi x330gr",d_orig:"Crema leche Serenísi x330gr",c:0,p:[4835.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Verdulería":[
+{d:"Papas x Negra kg",d_orig:"Papas x Negra kg",c:0,p:[999.00,0.00,0.00,1400.00]},
+{d:"Papas x blanca kg",d_orig:"Papas x blanca kg",c:0,p:[1599.00,0.00,0.00,1400.00]},
+{d:"Batata  x kg",d_orig:"Batata  x kg",c:0,p:[1299.00,0.00,0.00,2800.00]},
+{d:"Remolacha x kg ( o 1 atado)",d_orig:"Remolacha x kg ( o 1 atado)",c:0,p:[2999.00,0.00,0.00,3800.00]},
+{d:"Cebolla   x kg",d_orig:"Cebolla   x kg",c:0,p:[721.00,0.00,0.00,1300.00]},
+{d:"Zapallo  x kg",d_orig:"Zapallo  x kg",c:0,p:[1499.00,0.00,0.00,2300.00]},
+{d:"Cabutie chico / mediano x  kg",d_orig:"Cabutie chico / mediano x  kg",c:0,p:[2000.00,0.00,0.00,2000.00]},
+{d:"Calabaza (Anco) chico /medi x Ud",d_orig:"Calabaza (Anco) chico /medi x Ud",c:0,p:[1299.00,0.00,0.00,1900.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Zapallito  x kg",d_orig:"Zapallito  x kg",c:0,p:[1019.15,0.00,0.00,3200.00]},
+{d:"Zanahoria  x kg (Bolsa)",d_orig:"Zanahoria  x kg (Bolsa)",c:0,p:[1799.00,0.00,0.00,2500.00]},
+{d:"Tomate   x kg",d_orig:"Tomate   x kg",c:0,p:[1299.00,0.00,0.00,2500.00]},
+{d:"Lechuga Capuchina chica x kg",d_orig:"Lechuga Capuchina chica x kg",c:0,p:[1999.00,0.00,0.00,4900.00]},
+{d:"Lechuga Mantecosa chica x kg",d_orig:"Lechuga Mantecosa chica x kg",c:0,p:[2549.16,0.00,0.00,4900.00]},
+{d:"Repollo blanco x kg",d_orig:"Repollo blanco x kg",c:0,p:[1799.00,0.00,0.00,0.00]},
+{d:"Apio x kg",d_orig:"Apio x kg",c:0,p:[2299.00,0.00,0.00,2000.00]},
+{d:"Cebolla verdeo x ud",d_orig:"Cebolla verdeo x ud",c:0,p:[1104.20,0.00,0.00,7500.00]},
+{d:"Puerro",d_orig:"Puerro",c:0,p:[1499.00,0.00,0.00,2000.00]},
+{d:"Perejil x  ud",d_orig:"Perejil x  ud",c:0,p:[999.00,0.00,0.00,750.00]},
+{d:"Verdurita",d_orig:"Verdurita",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Ajo x  ud (Ud.)",d_orig:"Ajo x  ud (Ud.)",c:0,p:[999.00,0.00,0.00,2000.00]},
+{d:"Limón x kg (4 ud)",d_orig:"Limón x kg (4 ud)",c:0,p:[2039.00,0.00,0.00,3900.00]},
+{d:"Morrón rojo x  kg (4 Ud.)",d_orig:"Morrón rojo x  kg (4 Ud.)",c:0,p:[3144.16,0.00,0.00,4900.00]},
+{d:"Morrón amarillo x  kg (4 Ud.)",d_orig:"Morrón amarillo x  kg (4 Ud.)",c:0,p:[3699.00,0.00,0.00,4900.00]},
+{d:"Morrón verde x  kg (4 Ud.)",d_orig:"Morrón verde x  kg (4 Ud.)",c:0,p:[3499.00,0.00,0.00,4800.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Albahaca x  ud",d_orig:"Albahaca x  ud",c:0,p:[0.00,0.00,0.00,2000.00]},
+{d:"Berenjena  x kg (4 Ud medianas)",d_orig:"Berenjena  x kg (4 Ud medianas)",c:0,p:[2899.00,0.00,0.00,2500.00]},
+{d:"Espárragos x  kg (4 Ud.) Septie",d_orig:"Espárragos x  kg (4 Ud.) Septie",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Brócoli x kg",d_orig:"Brócoli x kg",c:0,p:[4674.15,0.00,0.00,0.00]},
+{d:"Repollito Bruselas x  kg (4 Ud.)",d_orig:"Repollito Bruselas x  kg (4 Ud.)",c:0,p:[9499.00,0.00,0.00,0.00]},
+{d:"Choclo x  kg (4 Ud.)",d_orig:"Choclo x  kg (4 Ud.)",c:0,p:[0.00,2500.00,0.00,0.00]},
+{d:"Alcaucil x  kg (4 Ud.)",d_orig:"Alcaucil x  kg (4 Ud.)",c:0.5,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Maple Huevos color",d_orig:"Maple Huevos color",c:1,p:[9500.00,0.00,0.00,8500.00]},
+{d:"Champiñones x  kg",d_orig:"Champiñones x  kg",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Porto bellos x  kg",d_orig:"Porto bellos x  kg",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Bandeja ensalada x  kg",d_orig:"Bandeja ensalada x  kg",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Bandeja sopa x  kg",d_orig:"Bandeja sopa x  kg",c:1,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Fruta":[
+{d:"Arándanos bandeja x 125 gr",d_orig:"Arándanos bandeja x 125 gr",c:0,p:[6999.00,0.00,0.00,0.00]},
+{d:"Banana ecuador x kg (4 Ud.)",d_orig:"Banana ecuador x kg (4 Ud.)",c:0,p:[1989.00,0.00,0.00,3000.00]},
+{d:"Manzana deliciosa x kg (4 Ud.)",d_orig:"Manzana deliciosa x kg (4 Ud.)",c:0,p:[3399.00,0.00,0.00,6000.00]},
+{d:"Manzana Gra Smith x kg (4 Ud.)",d_orig:"Manzana Gra Smith x kg (4 Ud.)",c:0,p:[3229.00,0.00,0.00,6000.00]},
+{d:"Mandarina x kg (4 Ud.)",d_orig:"Mandarina x kg (4 Ud.)",c:0,p:[1499.00,0.00,0.00,1300.00]},
+{d:"Naranja x kg  (4 Ud.)",d_orig:"Naranja x kg  (4 Ud.)",c:0,p:[1999.00,0.00,0.00,2800.00]},
+{d:"Pomelo x kg (4 Ud.)",d_orig:"Pomelo x kg (4 Ud.)",c:0,p:[2124.16,0.00,0.00,3000.00]},
+{d:"Pera Williams x  kg (4 Ud.)",d_orig:"Pera Williams x  kg (4 Ud.)",c:0,p:[2294.00,0.00,0.00,3900.00]},
+{d:"Ciruela  x kg",d_orig:"Ciruela  x kg",c:0,p:[3499.00,0.00,0.00,0.00]},
+{d:"Kiwi x  kg  (4 Ud.)",d_orig:"Kiwi x  kg  (4 Ud.)",c:0,p:[6999.00,0.00,0.00,0.00]},
+{d:"Uva negra  x kg",d_orig:"Uva negra  x kg",c:0,p:[0.00,0.00,0.00,5000.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Carnicería":[
+{d:"Bifes / Churrasquitos cuadril",d_orig:"Bifes / Churrasquitos cuadril",c:1,p:[17699.00,0.00,0.00,0.00]},
+{d:"Bife angosto",d_orig:"Bife angosto",c:1,p:[15999.00,0.00,0.00,0.00]},
+{d:"Bife ancho",d_orig:"Bife ancho",c:1,p:[14999.00,0.00,0.00,0.00]},
+{d:"Bife americano",d_orig:"Bife americano",c:1,p:[14799.00,0.00,0.00,0.00]},
+{d:"Asado de bife",d_orig:"Asado de bife",c:1,p:[15699.00,0.00,0.00,0.00]},
+{d:"Bife con lomo",d_orig:"Bife con lomo",c:1,p:[16999.00,0.00,0.00,0.00]},
+{d:"Lomo entero o medallones",d_orig:"Lomo entero o medallones",c:1,p:[23999.00,0.00,0.00,0.00]},
+{d:"Milanesas peceto",d_orig:"Milanesas peceto",c:1,p:[16000.00,0.00,0.00,0.00]},
+{d:"Milanesa Bola de lomo",d_orig:"Milanesa Bola de lomo",c:1,p:[16899.00,0.00,0.00,0.00]},
+{d:"Milanesa nalga",d_orig:"Milanesa nalga",c:1,p:[15299.00,0.00,0.00,0.00]},
+{d:"Milanesas cuadrada",d_orig:"Milanesas cuadrada",c:1,p:[16899.00,0.00,0.00,0.00]},
+{d:"Picada desgrasada (Tortu Palom)",d_orig:"Picada desgrasada (Tortu Palom)",c:2,p:[13599.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Colita cuadril",d_orig:"Colita cuadril",c:1,p:[20099.00,0.00,0.00,0.00]},
+{d:"Tapa de Nalga",d_orig:"Tapa de Nalga",c:1,p:[13799.00,0.00,0.00,0.00]},
+{d:"Asado de tira",d_orig:"Asado de tira",c:1,p:[12499.00,0.00,0.00,0.00]},
+{d:"Ojo de bife",d_orig:"Ojo de bife",c:1,p:[27999.00,0.00,0.00,0.00]},
+{d:"Bife de chorizo",d_orig:"Bife de chorizo",c:1,p:[20699.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Osobuco p/puchero",d_orig:"Osobuco p/puchero",c:0,p:[9899.00,0.00,0.00,0.00]},
+{d:"Hueso para caldo",d_orig:"Hueso para caldo",c:0,p:[4299.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Costillas de cerdo",d_orig:"Costillas de cerdo",c:1,p:[10000.00,0.00,0.00,0.00]},
+{d:"Chuleta cerdo /jamon /Paleta",d_orig:"Chuleta cerdo /jamon /Paleta",c:1,p:[4800.00,0.00,0.00,0.00]},
+{d:"Asado de cerdo",d_orig:"Asado de cerdo",c:1,p:[8200.00,0.00,0.00,0.00]},
+{d:"Carré de cerdo",d_orig:"Carré de cerdo",c:1,p:[7000.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Pechugas pollo x Ud",d_orig:"Pechugas pollo x Ud",c:1,p:[10000.00,0.00,0.00,11900.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Vinos":[
+{d:"Nieto Senetiner (Malbec)",d_orig:"Nieto Senetiner (Malbec)",c:0,p:[10300.00,0.00,0.00,0.00]},
+{d:"Trumpeter Ruttini (Malbec)",d_orig:"Trumpeter Ruttini (Malbec)",c:0,p:[10350.00,0.00,0.00,0.00]},
+{d:"Fond de Cave (Malbec)",d_orig:"Fond de Cave (Malbec)",c:0,p:[8251.00,0.00,0.00,0.00]},
+{d:"Fond de Cave Reserva (Malbec)",d_orig:"Fond de Cave Reserva (Malbec)",c:2,p:[13552.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Bebidas":[
+{d:"Agua Villa del Sur 6lts",d_orig:"Agua Villa del Sur 6lts",c:1,p:[5100.00,0.00,4221.00,0.00]},
+{d:"Vino cocina",d_orig:"Vino cocina",c:1,p:[0.00,0.00,0.00,0.00]},
+{d:"Coca Cola x 2.5L",d_orig:"Coca Cola x 2.5L",c:0,p:[5250.00,4500.00,0.00,0.00]},
+{d:"Cerveza Corona c/u 710 cc",d_orig:"Cerveza Corona c/u 710 cc",c:6,p:[4912.50,5600.00,5760.00,0.00]},
+{d:"Fernet Branca x 450 ml",d_orig:"Fernet Branca x 450 ml",c:0,p:[11445.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Almacén":[
+{d:"Condimento Orégano",d_orig:"Condimento Orégano",c:0,p:[2705.00,0.00,0.00,0.00]},
+{d:"Condimento Pimentón dulce",d_orig:"Condimento Pimentón dulce",c:1,p:[1000.00,0.00,0.00,0.00]},
+{d:"Condimento Pimienta negra",d_orig:"Condimento Pimienta negra",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Condimento Romero",d_orig:"Condimento Romero",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Condimento Provenzal Alicante",d_orig:"Condimento Provenzal Alicante",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Aceite Natura x 1.5 Lt",d_orig:"Aceite Natura x 1.5 Lt",c:1,p:[6645.00,0.00,0.00,0.00]},
+{d:"Aceite Oliva x 0.5 Lt",d_orig:"Aceite Oliva x 0.5 Lt",c:0,p:[14309.00,0.00,0.00,0.00]},
+{d:"Sal Fina Celusal x 500 gr",d_orig:"Sal Fina Celusal x 500 gr",c:0,p:[1462.00,0.00,0.00,0.00]},
+{d:"Sal Gruesa Celusal x kgr",d_orig:"Sal Gruesa Celusal x kgr",c:1,p:[2594.00,0.00,0.00,0.00]},
+{d:"Vinagre manzana x 1 lt",d_orig:"Vinagre manzana x 1 lt",c:0,p:[3799.00,0.00,0.00,0.00]},
+{d:"Vinagre alcoh Menollo x 1lt",d_orig:"Vinagre alcoh Menollo x 1lt",c:0,p:[1641.00,0.00,0.00,0.00]},
+{d:"Aceto balsámico x 250 ml",d_orig:"Aceto balsámico x 250 ml",c:0,p:[3270.00,0.00,0.00,0.00]},
+{d:"Rebozad preferido horno x500 gr",d_orig:"Rebozad preferido horno x500 gr",c:0,p:[4100.00,0.00,0.00,0.00]},
+{d:"Aceituna descarozada Nucete",d_orig:"Aceituna descarozada Nucete",c:0,p:[2970.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Mayo Natura x 1 kg",d_orig:"Mayo Natura x 1 kg",c:1,p:[5573.00,0.00,0.00,0.00]},
+{d:"Mostaza Savora pack x250g",d_orig:"Mostaza Savora pack x250g",c:1,p:[1567.00,0.00,0.00,0.00]},
+{d:"Kétchup pack x250g",d_orig:"Kétchup pack x250g",c:1,p:[0.00,0.00,0.00,0.00]},
+{d:"Salsa Soja Parmesana 330ml",d_orig:"Salsa Soja Parmesana 330ml",c:0,p:[3855.00,0.00,0.00,0.00]},
+{d:"Arroz Gallo integral x 500 gr",d_orig:"Arroz Gallo integral x 500 gr",c:1,p:[1680.00,0.00,0.00,0.00]},
+{d:"Arroz Gallo Oro pag x 800 gr",d_orig:"Arroz Gallo Oro pag x 800 gr",c:1,p:[3300.00,0.00,0.00,0.00]},
+{d:"Picadillo Carne Swift",d_orig:"Picadillo Carne Swift",c:2,p:[1289.00,0.00,0.00,0.00]},
+{d:"Paté de foie Swift",d_orig:"Paté de foie Swift",c:2,p:[1289.00,0.00,0.00,0.00]},
+{d:"Garbanzos x 1/2 kg",d_orig:"Garbanzos x 1/2 kg",c:2,p:[2999.00,0.00,0.00,0.00]},
+{d:"Lentejas 1/2K",d_orig:"Lentejas 1/2K",c:2,p:[1900.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Fideos mostach Mataraz x500gr",d_orig:"Fideos mostach Mataraz x500gr",c:1,p:[0.00,0.00,0.00,0.00]},
+{d:"Fideos Tirabuz Mataraz x500gr",d_orig:"Fideos Tirabuz Mataraz x500gr",c:1,p:[1850.00,0.00,0.00,0.00]},
+{d:"Fideos moñito  Mataraz x500gr",d_orig:"Fideos moñito  Mataraz x500gr",c:1,p:[2900.00,0.00,0.00,0.00]},
+{d:"Fideos para sopa x 500gr",d_orig:"Fideos para sopa x 500gr",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Tallarines Don Vicente x 500gr",d_orig:"Tallarines Don Vicente x 500gr",c:1,p:[0.00,0.00,0.00,0.00]},
+{d:"Sopa crema arveja cebolla etc",d_orig:"Sopa crema arveja cebolla etc",c:0,p:[2589.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Harina Común x 1 kg",d_orig:"Harina Común x 1 kg",c:0,p:[1060.45,0.00,0.00,0.00]},
+{d:"Harina Leudante x 1 kg",d_orig:"Harina Leudante x 1 kg",c:0,p:[1269.23,0.00,0.00,0.00]},
+{d:"Harina Pureza pizza x 1 kg",d_orig:"Harina Pureza pizza x 1 kg",c:0,p:[1984.81,0.00,0.00,0.00]},
+{d:"Harina Pureza pan casero x 1 kg",d_orig:"Harina Pureza pan casero x 1 kg",c:0,p:[2129.00,0.00,0.00,0.00]},
+{d:"Tomate trit Inca bot vidrio 910gr",d_orig:"Tomate trit Inca bot vidrio 910gr",c:0,p:[3249.00,0.00,0.00,0.00]},
+{d:"Conserva Tomate",d_orig:"Conserva Tomate",c:0,p:[1.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Arvejas en Lata Inca",d_orig:"Arvejas en Lata Inca",c:2,p:[899.00,0.00,0.00,0.00]},
+{d:"Choclo blanco lata (no cremoso)",d_orig:"Choclo blanco lata (no cremoso)",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Lenteja en lata Inca",d_orig:"Lenteja en lata Inca",c:1,p:[1297.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Azúcar Ledesma x 1kg",d_orig:"Azúcar Ledesma x 1kg",c:0,p:[1499.00,0.00,0.00,0.00]},
+{d:"Yerba x  Playadito x 1kg",d_orig:"Yerba x  Playadito x 1kg",c:1,p:[4999.00,5200.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Puré Chef /  Maggi 125gr",d_orig:"Puré Chef /  Maggi 125gr",c:2,p:[2835.00,0.00,0.00,0.00]},
+{d:"Leche polvo La Lechera x400gr",d_orig:"Leche polvo La Lechera x400gr",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Avena Quaker x 550 gr",d_orig:"Avena Quaker x 550 gr",c:0,p:[3240.10,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Gelatina Exquisita 40gr",d_orig:"Gelatina Exquisita 40gr",c:0,p:[1200.00,0.00,0.00,0.00]},
+{d:"Pan hamburg Bimbo artesano",d_orig:"Pan hamburg Bimbo artesano",c:1,p:[4163.00,0.00,0.00,0.00]},
+{d:"Pan pancho x 6 Bimbo artesano",d_orig:"Pan pancho x 6 Bimbo artesano",c:2,p:[4163.00,0.00,0.00,0.00]},
+{d:"Pan salvado Fargo x 600 gr",d_orig:"Pan salvado Fargo x 600 gr",c:0,p:[7255.00,0.00,0.00,0.00]},
+{d:"Escancia de vainilla",d_orig:"Escancia de vainilla",c:1,p:[2086.00,0.00,0.00,0.00]},
+{d:"Chocolate Aguila 80% 150gr",d_orig:"Chocolate Aguila 80% 150gr",c:1,p:[10632.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Twistos 4 quesos / jamón / etc.",d_orig:"Twistos 4 quesos / jamón / etc.",c:1,p:[3490.00,0.00,2947.50,0.00]},
+{d:"Mermelada nar / Duraz BC",d_orig:"Mermelada nar / Duraz BC",c:0,p:[3742.00,0.00,0.00,0.00]},
+{d:"Mermelada frutilla BC",d_orig:"Mermelada frutilla BC",c:0,p:[3030.31,0.00,0.00,0.00]},
+{d:"Mermelada arandano BC",d_orig:"Mermelada arandano BC",c:0,p:[4919.00,0.00,0.00,0.00]},
+{d:"Galletitas dulces / Bizcoch",d_orig:"Galletitas dulces / Bizcoch",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Te Green Hills x 50 saquitos",d_orig:"Te Green Hills x 50 saquitos",c:0,p:[2755.00,0.00,0.00,0.00]},
+{d:"Café Instantáneo Dolca x 100",d_orig:"Café Instantáneo Dolca x 100",c:0,p:[5630.00,0.00,0.00,0.00]},
+{d:"Nesquick x 360 gr",d_orig:"Nesquick x 360 gr",c:0,p:[2935.20,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Granix sándwich x3",d_orig:"Granix sándwich x3",c:1,p:[4594.00,0.00,0.00,0.00]},
+{d:"Cerealitas pack x 3",d_orig:"Cerealitas pack x 3",c:1,p:[5182.00,0.00,0.00,0.00]},
+{d:"Twistos 4 que / jamón / 155gr",d_orig:"Twistos 4 que / jamón / 155gr",c:1,p:[5000.00,0.00,2947.50,0.00]},
+{d:"Bizco Granix Lino /Gira / Sésa",d_orig:"Bizco Granix Lino /Gira / Sésa",c:1,p:[1922.00,0.00,0.00,0.00]},
+{d:"Bizcochos Don Satur",d_orig:"Bizcochos Don Satur",c:1,p:[1300.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Puré tomates Campagno x520gr",d_orig:"Puré tomates Campagno x520gr",c:0,p:[1045.30,0.00,0.00,0.00]},
+{d:"Harina de Maíz Polenta 490gr",d_orig:"Harina de Maíz Polenta 490gr",c:0,p:[1599.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Rollo cocina Susex ultra x 3  kg (4 Ud.)",d_orig:"Rollo cocina Susex ultra x 3  kg (4 Ud.)",c:0,p:[4653.00,0.00,0.00,0.00]},
+{d:"Papel higiénico x 4  kg (4 Ud.)",d_orig:"Papel higiénico x 4  kg (4 Ud.)",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Lavado Ropa":[
+{d:"Jabón en polvo Zorro x 3Kg",d_orig:"Jabón en polvo Zorro x 3Kg",c:0,p:[8903.99,0.00,0.00,0.00]},
+{d:"Woolite x 400",d_orig:"Woolite x 400",c:0,p:[3644.99,0.00,0.00,0.00]},
+{d:"Repuesto Trenet / vanish  x 400",d_orig:"Repuesto Trenet / vanish  x 400",c:0,p:[3550.99,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Piso":[
+{d:"Poett piso x180",d_orig:"Poett piso x180",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Blem x400cc",d_orig:"Blem x400cc",c:0,p:[5566.99,0.00,0.00,0.00]},
+],
+"Cocina":[
+{d:"Repuesto Cif Anti grasa (250ml)",d_orig:"Repuesto Cif Anti grasa (250ml)",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Rep. Mr. Musc /Cif Vidri (250ml)",d_orig:"Rep. Mr. Musc /Cif Vidri (250ml)",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Detergente Magistral x 450cc",d_orig:"Detergente Magistral x 450cc",c:0,p:[3255.99,0.00,0.00,0.00]},
+{d:"Limpia Hornos",d_orig:"Limpia Hornos",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Rollito virulana",d_orig:"Rollito virulana",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Esponjita verde",d_orig:"Esponjita verde",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Esponjita doble cara",d_orig:"Esponjita doble cara",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Esponjita fibra chatita",d_orig:"Esponjita fibra chatita",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Guantes Nro. 7.5",d_orig:"Guantes Nro. 7.5",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Desodor Ambi. Poett Mar Azul",d_orig:"Desodor Ambi. Poett Mar Azul",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Lisoform",d_orig:"Lisoform",c:0,p:[5328.99,0.00,0.00,0.00]},
+{d:"Lavandina Ayudín x 2 Lt",d_orig:"Lavandina Ayudín x 2 Lt",c:0,p:[2761.99,0.00,0.00,0.00]},
+{d:"Mata mosquitos Raid 360gr",d_orig:"Mata mosquitos Raid 360gr",c:0,p:[6550.99,0.00,0.00,0.00]},
+{d:"Mata cucarachas Raid",d_orig:"Mata cucarachas Raid",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Mata polillas Raid",d_orig:"Mata polillas Raid",c:0,p:[6412.99,0.00,0.00,0.00]},
+],
+"Baño":[
+{d:"Repuesto Cif Baño (450ml)",d_orig:"Repuesto Cif Baño (450ml)",c:0,p:[1388.87,0.00,0.00,0.00]},
+{d:"Pastillas Mr. Musc mochila x2 ud",d_orig:"Pastillas Mr. Musc mochila x2 ud",c:0,p:[3488.89,0.00,0.00,0.00]},
+{d:"Harpic antisarro",d_orig:"Harpic antisarro",c:0,p:[5772.99,0.00,0.00,0.00]},
+{d:"Trapo rejilla baño",d_orig:"Trapo rejilla baño",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Esponjita verde baño",d_orig:"Esponjita verde baño",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Pala basura",d_orig:"Pala basura",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Secador vidrios",d_orig:"Secador vidrios",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Secador Grande",d_orig:"Secador Grande",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Secador Chico",d_orig:"Secador Chico",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Escobillón",d_orig:"Escobillón",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Trapos":[
+{d:"Trapo rejilla cocina",d_orig:"Trapo rejilla cocina",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Trapo rejilla vidrios",d_orig:"Trapo rejilla vidrios",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Trapo de piso",d_orig:"Trapo de piso",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Pala basura",d_orig:"Pala basura",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Secador vidrios",d_orig:"Secador vidrios",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Escobillón",d_orig:"Escobillón",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Secador Grande",d_orig:"Secador Grande",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Secador Chico",d_orig:"Secador Chico",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Misceláneos":[
+{d:"Sahumerios Sándalo Mirra Incienso",d_orig:"Sahumerios Sándalo Mirra Incienso",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Fósforos",d_orig:"Fósforos",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Lamparitas Bajo consumo",d_orig:"Lamparitas Bajo consumo",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Bolsas Ziplock chicas",d_orig:"Bolsas Ziplock chicas",c:2,p:[0.00,0.00,0.00,0.00]},
+{d:"Separadores de freezer",d_orig:"Separadores de freezer",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Agua destilada x 5 L",d_orig:"Agua destilada x 5 L",c:1,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+],
+"Zona Cajas":[
+{d:"Pilas AA duracell",d_orig:"Pilas AA duracell",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Pilas AAA duracell",d_orig:"Pilas AAA duracell",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Pilas 9V guitarra / balanza",d_orig:"Pilas 9V guitarra / balanza",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"Escarbadientes",d_orig:"Escarbadientes",c:0,p:[0.00,0.00,0.00,0.00]},
+{d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
+]
+};
+var htmlVersion='20260427181901';
+var verChecked=true;
+var editMode=false;
+var totalPendiente=0;
+function toggleEdit(){
+editMode=!editMode;
+let b=document.getElementById('btnEdit');
+if(editMode){
+b.innerHTML='&#128275; Nombres';
+b.classList.add('edit-active');
+}else{
+b.innerHTML='&#128274; Nombres';
+b.classList.remove('edit-active');
+}
+mostrar();
+}
+function keyItem(t,d){return 'chk_'+t+'_'+d;}
+function keyPrecio(t,d,prov){return 'precio_'+t+'_'+d+'_'+prov;}
+function keyCant(t,d){return 'cant_'+t+'_'+d;}
+function keyDesc(t,d_orig){return 'desc_'+t+'_'+d_orig;}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lsRemove(k){try{localStorage.removeItem(k);}catch(e){}}
+function lsClear(){try{localStorage.clear();}catch(e){}}
+function exportarJSON(){
+let exp={};
+Object.keys(lista).forEach(t=>{
+exp[t]=lista[t].map(it=>{
+let p=it.p.map((v,i)=>{let lv=lsGet(keyPrecio(t,it.d_orig,i));return lv!==null?parseFloat(parseFloat(lv).toFixed(2)):v;});
+let cv=lsGet(keyCant(t,it.d_orig));let c=cv!==null?parseFloat(cv):it.c;
+let dv=lsGet(keyDesc(t,it.d_orig));let d=dv!==null?dv:it.d;
+return {d:d,d_orig:it.d_orig,c:c,p:p,comprado:lsGet(keyItem(t,it.d_orig))=='1'};
+});
+});
+let txt=JSON.stringify(exp,null,2);
+let blob=new Blob([txt],{type:'application/json'});
+let a=document.createElement('a');a.href=URL.createObjectURL(blob);
+a.download='precios_super.json';a.click();
+}
+function borrarChecks(){
+lsClear();
+lsSet('htmlVersion',htmlVersion);
+verChecked=true;
+let b=document.getElementById('btnComprados');
+b.textContent='Ocultar comprados';b.style.color='#4CAF50';
+cargarTitulos();
+}
+function toggleChecked(){
+verChecked=!verChecked;
+let b=document.getElementById('btnComprados');
+if(verChecked){b.textContent='Comprados No';b.style.color='#4CAF50';}
+else{b.textContent='Comprados Si';b.style.color='#64B5F6';}
+cargarTitulos();
+}
+function cargarTitulos(){
+let s=document.getElementById('titulos');
+let actual=s.value;
+s.innerHTML='';
+let oTodos=document.createElement('option');oTodos.value='**TODOS**';oTodos.textContent='Todos';s.appendChild(oTodos);
+Object.keys(lista).forEach(t=>{
+let pendientes=0;let total=0;
+lista[t].forEach(it=>{
+if(it.d_orig=='-')return;
+if(it.c==0)return;
+total++;
+let k=keyItem(t,it.d_orig);
+let checked=(lsGet(k)=='1');
+if(!checked)pendientes++;
+});
+let todos=(pendientes==0);
+if(verChecked || !todos){
+let o=document.createElement('option');o.value=t;
+o.textContent=todos?t:t+' ('+pendientes+')';
+if(todos)o.style.opacity='0.35';
+s.appendChild(o);
+}
+});
+if(actual){
+let found=Array.from(s.options).some(o=>o.value===actual);
+if(found)s.value=actual;
+}
+mostrar();
+}
+function fmt(n){
+let neg=n<0;let v=Math.abs(Number(n)||0).toFixed(2);
+let p=v.split('.');
+p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+return (neg?'-':'')+p[0]+','+p[1];
+}
+function getPrecio(t,it,prov){
+let k=keyPrecio(t,it.d_orig,prov);
+let stored=lsGet(k);
+return stored!==null?parseFloat(stored):(it.p[prov]||0);
+}
+function getCant(t,it){
+let stored=lsGet(keyCant(t,it.d_orig));
+return stored!==null?parseFloat(stored):it.c;
+}
+function getDesc(t,it){
+let stored=lsGet(keyDesc(t,it.d_orig));
+return stored!==null?stored:it.d;
+}
+function selectAll(el){
+if(window.getSelection&&document.createRange){
+let r=document.createRange();r.selectNodeContents(el);
+let s=window.getSelection();s.removeAllRanges();s.addRange(r);
+}else{document.execCommand('selectAll',false,null);}
+}
+function mostrar(){
+let _sy=window.scrollY||window.pageYOffset||0;
+totalPendiente=0;
+let sel=document.getElementById('titulos').value;
+let prov=parseInt(document.getElementById('proveedor').value);
+let tabla=document.getElementById('tabla');tabla.innerHTML='';
+function fila(t,it){
+if(it.d_orig=='--'){
+let tr=document.createElement('tr');
+let td1=document.createElement('td');td1.textContent='';
+let td2=document.createElement('td');td2.textContent='';
+let td3=document.createElement('td');td3.textContent='';
+let td5=document.createElement('td');td5.className='chk';
+let ch=document.createElement('input');ch.type='checkbox';
+let k=keyItem(t,it.d_orig);
+let stored=lsGet(k);
+let isChecked=(stored===null || stored=='1');
+if(!verChecked && isChecked)return;
+ch.checked=isChecked;
+ch.onchange=function(){
+if(ch.checked){lsSet(k,'1');}else{lsSet(k,'0');}
+mostrar();
+};
+td5.appendChild(ch);
+tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tr.appendChild(td5);
+if(isChecked)tr.classList.add('faded');
+tabla.appendChild(tr);
+return;
+}
+let pu=getPrecio(t,it,prov);
+let cu=getCant(t,it);
+let du=getDesc(t,it);
+let k=keyItem(t,it.d_orig);
+let stored=lsGet(k);
+let isChecked=(getCant(t,it)==0 && stored===null)?true:(stored=='1');
+if(!verChecked && isChecked)return;
+if(!isChecked && cu>0){totalPendiente+=(cu*pu);}
+let tr=document.createElement('tr');
+if(isChecked)tr.classList.add('faded');
+let td1=document.createElement('td');
+td1.textContent=du;
+td1.contentEditable=editMode?'true':'false';
+td1.style.cursor=editMode?'text':'default';
+td1.title=editMode?'':'Activar Nombres para editar';
+if(editMode){
+td1.onfocus=function(){setTimeout(()=>{selectAll(td1);},0);};
+td1.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();td1.blur();}};
+td1.onblur=function(){
+let v=td1.textContent.trim();
+if(v===''){td1.textContent=du;return;}
+it.d=v;
+lsSet(keyDesc(t,it.d_orig),v);
+mostrar();
+};
+}
+let td2=document.createElement('td');td2.textContent=cu;td2.className='qty';td2.contentEditable=true;td2.inputMode='decimal';
+td2.onfocus=function(){td2.classList.add('editando');setTimeout(()=>{selectAll(td2);},0);};
+td2.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();td2.blur();}};
+td2.onblur=function(){td2.classList.remove('editando');
+let v=parseFloat(td2.textContent.replace(',','.'))||0;
+v=Math.round(v*100)/100;it.c=v;
+lsSet(keyCant(t,it.d_orig),v);
+td2.textContent=v;
+mostrar();
+};
+let td3=document.createElement('td');td3.textContent=fmt(pu);td3.className='precio';td3.contentEditable=true;td3.inputMode='decimal';
+td3.onfocus=function(){td3.classList.add('editando');setTimeout(()=>{selectAll(td3);},0);};
+td3.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();td3.blur();}};
+td3.onblur=function(){td3.classList.remove('editando');
+let v=parseFloat(td3.textContent.replace(/\./g,'').replace(',','.'))||0;
+v=parseFloat(v.toFixed(2));
+it.p[prov]=v;
+lsSet(keyPrecio(t,it.d_orig,prov),v);
+td3.textContent=fmt(v);
+mostrar();
+};
+let td5=document.createElement('td');td5.className='chk';
+let ch=document.createElement('input');ch.type='checkbox';ch.checked=isChecked;
+ch.onchange=function(){
+if(ch.checked){tr.classList.add('faded');lsSet(k,'1');}
+else{tr.classList.remove('faded');lsRemove(k);}
+mostrar();
+};
+td5.appendChild(ch);
+tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tr.appendChild(td5);
+tabla.appendChild(tr);
+}
+if(sel=='**TODOS**'){
+Object.keys(lista).forEach(t=>{
+let visibles=false;
+let subtotalCat=0;
+lista[t].forEach(it=>{
+if(it.d_orig=='-'){visibles=true;return;}
+let k=keyItem(t,it.d_orig);
+let stored=lsGet(k);
+let checked=(it.c==0 && stored===null)?true:(stored=='1');
+if(verChecked || !checked){if(it.c>0 || verChecked) visibles=true;}
+let cu=getCant(t,it);
+if(!checked && cu>0){subtotalCat+=cu*getPrecio(t,it,prov);}
+});
+if(!visibles) return;
+let trt=document.createElement('tr');trt.className='titulo';
+let tdt=document.createElement('td');tdt.colSpan=4;
+tdt.innerHTML=t+(subtotalCat>0?'<span class="subtitulo-total">$'+fmt(subtotalCat)+'</span>':'');
+trt.appendChild(tdt);tabla.appendChild(trt);
+lista[t].forEach(it=>fila(t,it));
+});
+}else{
+let t=sel;lista[t].forEach(it=>fila(t,it));
+}
+document.getElementById('totalPendiente').textContent='Total: $'+fmt(totalPendiente);
+requestAnimationFrame(function(){window.scrollTo(0,_sy);});
+}
+window.onload=function(){
+if(lsGet('htmlVersion')!==htmlVersion){lsClear();lsSet('htmlVersion',htmlVersion);}
+cargarTitulos();
+};
+</script></body></html>

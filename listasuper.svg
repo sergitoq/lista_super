@@ -1,0 +1,46 @@
+<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- fondo del carrito -->
+  <rect x="195" y="80" width="220" height="130" rx="12" fill="#1a7a3c" />
+
+  <!-- items dentro del carrito -->
+  <rect x="213" y="98" width="42" height="52" rx="5" fill="#f5c842"/>
+  <rect x="263" y="98" width="42" height="52" rx="5" fill="#e05c3a"/>
+  <rect x="313" y="98" width="42" height="52" rx="5" fill="#4a9de0"/>
+  <rect x="213" y="158" width="90" height="38" rx="5" fill="#c0e87a"/>
+  <rect x="313" y="158" width="42" height="38" rx="5" fill="#e8a05a"/>
+
+  <!-- barras decorativas en productos -->
+  <rect x="218" y="120" width="32" height="4" rx="2" fill="#c8a000" opacity="0.7"/>
+  <rect x="218" y="128" width="24" height="4" rx="2" fill="#c8a000" opacity="0.7"/>
+  <rect x="268" y="120" width="32" height="4" rx="2" fill="#a03a1a" opacity="0.7"/>
+  <rect x="268" y="128" width="20" height="4" rx="2" fill="#a03a1a" opacity="0.7"/>
+  <rect x="318" y="120" width="32" height="4" rx="2" fill="#2a6aa0" opacity="0.7"/>
+  <rect x="318" y="128" width="24" height="4" rx="2" fill="#2a6aa0" opacity="0.7"/>
+
+  <!-- estructura del carrito -->
+  <line x1="160" y1="230" x2="195" y2="80" stroke="#1a7a3c" stroke-width="10" stroke-linecap="round"/>
+  <line x1="415" y1="80" x2="450" y2="230" stroke="#1a7a3c" stroke-width="10" stroke-linecap="round"/>
+  <line x1="160" y1="230" x2="450" y2="230" stroke="#1a7a3c" stroke-width="10" stroke-linecap="round"/>
+  <line x1="415" y1="80" x2="490" y2="80" stroke="#1a7a3c" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="490" cy="80" r="10" fill="#1a7a3c"/>
+
+  <!-- ruedas -->
+  <circle cx="215" cy="262" r="22" fill="#222"/>
+  <circle cx="215" cy="262" r="12" fill="#555"/>
+  <circle cx="215" cy="262" r="5"  fill="#888"/>
+  <circle cx="400" cy="262" r="22" fill="#222"/>
+  <circle cx="400" cy="262" r="12" fill="#555"/>
+  <circle cx="400" cy="262" r="5"  fill="#888"/>
+
+  <!-- check flotante -->
+  <circle cx="470" cy="160" r="26" fill="#f5c842"/>
+  <path d="M458 160 L467 170 L483 150" fill="none" stroke="#1a3a0a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- texto -->
+  <text x="340" y="318" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="700" letter-spacing="3" fill="#1a7a3c">ListaSuper</text>
+
+  <!-- punto decorativo -->
+  <circle cx="520" cy="284" r="7" fill="#f5c842"/>
+
+</svg>
