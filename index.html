@@ -27,7 +27,7 @@ input[type=checkbox]{transform:scale(1.5);margin:0}
 </style>
 </head><body>
 <div class='topbar'>
-<h3 style='color:#4CAF50'>Lista Super 01/06</h3>
+<h3 style='color:#4CAF50'>Lista Super 09/06</h3>
 <div>
 <button onclick='exportarJSON()'>Gen Feedback</button>
 <button onclick='borrarChecks()'>Borrar checks</button>
@@ -42,6 +42,7 @@ input[type=checkbox]{transform:scale(1.5);margin:0}
 </select>
 <button id='btnComprados' onclick='toggleChecked()' style='color:#4CAF50'>Comprados No</button>
 <button id='btnEdit' onclick='toggleEdit()' title='Habilitar edicion de nombres'>&#128274; Nombres</button>
+<button id='btnPrecio' onclick='togglePrecio()' title='Habilitar edicion de precios'>&#128274; Precios</button>
 <div style='margin-top:10px;padding:8px;border:1px solid #444;background:#111;text-align:center'>
 <span id='totalPendiente' style='font-size:18px;color:#FFC107;display:inline-block;width:100%'>Total: $0,00</span>
 </div>
@@ -129,7 +130,7 @@ var lista={
 {d:"Lechuga Mantecosa chica x kg",d_orig:"Lechuga Mantecosa chica x kg",c:0,p:[2549.16,0.00,0.00,4900.00]},
 {d:"Repollo blanco x kg",d_orig:"Repollo blanco x kg",c:0,p:[1799.00,0.00,0.00,0.00]},
 {d:"Apio x kg",d_orig:"Apio x kg",c:0,p:[2299.00,0.00,0.00,2000.00]},
-{d:"Cebolla verdeo x ud",d_orig:"Cebolla verdeo x ud",c:0,p:[1104.23,0.00,0.00,7500.00]},
+{d:"Cebolla verdeo x ud",d_orig:"Cebolla verdeo x ud",c:0,p:[1104.24,0.00,0.00,7500.00]},
 {d:"Puerro",d_orig:"Puerro",c:0,p:[1499.00,0.00,0.00,2000.00]},
 {d:"Perejil x  ud",d_orig:"Perejil x  ud",c:0,p:[999.00,0.00,0.00,750.00]},
 {d:"Verdurita",d_orig:"Verdurita",c:0,p:[0.00,0.00,0.00,0.00]},
@@ -249,7 +250,7 @@ var lista={
 {d:"Tallarines Don Vicente x 500gr",d_orig:"Tallarines Don Vicente x 500gr",c:1,p:[0.00,0.00,0.00,0.00]},
 {d:"Sopa crema arveja cebolla etc",d_orig:"Sopa crema arveja cebolla etc",c:0,p:[2589.00,0.00,0.00,0.00]},
 {d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
-{d:"Harina Común x 1 kg",d_orig:"Harina Común x 1 kg",c:0,p:[1060.48,0.00,0.00,0.00]},
+{d:"Harina Común x 1 kg",d_orig:"Harina Común x 1 kg",c:0,p:[1060.49,0.00,0.00,0.00]},
 {d:"Harina Leudante x 1 kg",d_orig:"Harina Leudante x 1 kg",c:0,p:[1269.26,0.00,0.00,0.00]},
 {d:"Harina Pureza pizza x 1 kg",d_orig:"Harina Pureza pizza x 1 kg",c:0,p:[1984.81,0.00,0.00,0.00]},
 {d:"Harina Pureza pan casero x 1 kg",d_orig:"Harina Pureza pan casero x 1 kg",c:0,p:[2129.00,0.00,0.00,0.00]},
@@ -364,9 +365,10 @@ var lista={
 {d:"--",d_orig:"--",c:0,p:[0.00,0.00,0.00,0.00]},
 ]
 };
-var htmlVersion='20260601110031';
+var htmlVersion='20260609111156';
 var verChecked=true;
 var editMode=false;
+var editPrecio=false;
 var totalPendiente=0;
 function toggleEdit(){
 editMode=!editMode;
@@ -378,6 +380,13 @@ b.classList.add('edit-active');
 b.innerHTML='&#128274; Nombres';
 b.classList.remove('edit-active');
 }
+mostrar();
+}
+function togglePrecio(){
+editPrecio=!editPrecio;
+let b=document.getElementById('btnPrecio');
+if(editPrecio){b.innerHTML='&#128275; Precios';b.classList.add('edit-active');}
+else{b.innerHTML='&#128274; Precios';b.classList.remove('edit-active');}
 mostrar();
 }
 function keyItem(t,d){return 'chk_'+t+'_'+d;}
@@ -537,7 +546,10 @@ lsSet(keyCant(t,it.d_orig),v);
 td2.textContent=v;
 mostrar();
 };
-let td3=document.createElement('td');td3.textContent=fmt(pu);td3.className='precio';td3.contentEditable=true;
+let td3=document.createElement('td');td3.textContent=fmt(pu);td3.className='precio';td3.contentEditable=editPrecio?'true':'false';
+td3.style.cursor=editPrecio?'text':'default';
+td3.title=editPrecio?'':'Activar Precios para editar';
+if(editPrecio){
 td3.onfocus=function(){td3.classList.add('editando');setTimeout(()=>{selectAll(td3);},0);};
 td3.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();td3.blur();}};
 td3.onblur=function(){td3.classList.remove('editando');
@@ -548,6 +560,7 @@ lsSet(keyPrecio(t,it.d_orig,prov),v);
 td3.textContent=fmt(v);
 mostrar();
 };
+}
 let td5=document.createElement('td');td5.className='chk';
 let ch=document.createElement('input');ch.type='checkbox';ch.checked=isChecked;
 ch.onchange=function(){
